@@ -1,3 +1,5 @@
 *.png
 *.json
 *.sh
+benign/
+malignant/
