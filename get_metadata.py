@@ -1,8 +1,6 @@
 import json
 import requests
-import subprocess
 from pprint import pprint
-from time import sleep
 from tqdm import tqdm
 
 isic_url = 'https://isic-archive.com:443/api/v1/image'
@@ -13,7 +11,6 @@ img_meta ={}
 img_dataset = []
    
 for n in tqdm(range(0, len(img_id_list))):
-    #print(img_id_list[n]["_id"])#Print all ID's from get request
     img_meta_request = requests.get(isic_url+'/'+img_id_list[n]['_id'])
     img_meta_list = img_meta_request.json()
     img_meta['id'] = img_id_list[n]['_id']
