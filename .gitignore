@@ -3,3 +3,4 @@
 *.sh
 benign/
 malignant/
+*.bin
