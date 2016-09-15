@@ -28,11 +28,23 @@ if os.path.exists(img_dataset_path):
     out = []
     bin_meta = []
     meta_out = []
-    while len(bin_meta) < 10:
-        im_choice = ran.choice(data)
+    size = 8
+    while size:
+        index = ran.randrange(len(data))
+        im_choice = data[index]
         if im_choice not in bin_meta:
             bin_meta.append(dict(im_choice))
             out = np.append(imprep(im_choice),out)
+            size = size-1
+    mal_data = [x for x in data if x['b_m'] == 'malignant']
+    size = 2
+    while size:
+        index = ran.randrange(len(mal_data))
+        im_choice = mal_data[index]
+        if im_choice not in bin_meta:
+            bin_meta.append(dict(im_choice))
+            out = np.append(imprep(im_choice),out)
+            size = size-1
     out.tofile('out.bin')
 
     f=open('out.json','w')
