@@ -8,31 +8,15 @@ import sys
 import json
 import requests
 import os.path
-import shutil
+
 from tqdm import tqdm
 from termcolor import colored, cprint
+
+from state_handler import set_state, check_state
 import ynquery
 
 
 isic_url = 'https://isic-archive.com:443/api/v1/image'
-
-def set_state(directory):
-    f = open('.state', 'w')
-    state = {}
-    state['dir'] = directory
-    json.dump(state,f)
-    f.close()
-
-def check_state():
-    return os.path.isfile('.state')
-
-def clean_up():
-    if os.path.isfile('.state'):
-        current_dataset = json.load(open('.state'))
-        if ynquery.ynQuery("Should I delete " + current_dataset['dir']):
-            shutil.rmtree(current_dataset['dir'])
-            os.remove('.state')
-
 
 #User input to use default or custom path to store dataset
 def input_path():

@@ -8,6 +8,10 @@ import os.path
 from pprint import pprint
 from tqdm import tqdm
 
+import isic_api as api
+
+api.checkstate()
+
 img_dataset_path = '/tmp/isic_dataset/'
 b_m_dict = {'benign':0,'malignant':1}
 
