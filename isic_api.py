@@ -12,7 +12,7 @@ import os.path
 from tqdm import tqdm
 from termcolor import colored, cprint
 
-from state_handler import set_state, check_state
+import utils 
 import ynquery
 
 
@@ -20,7 +20,7 @@ isic_url = 'https://isic-archive.com:443/api/v1/image'
 
 #User input to use default or custom path to store dataset
 def input_path():
-    if check_state():
+    if utils.state.exists():
         current_dataset = json.load(open('.state'))
         cprint("Your data is in "+ current_dataset['dir']+"\n","blue")
         img_dataset_path = current_dataset['dir']
@@ -95,7 +95,7 @@ def get_data(directory):
     f.write(json.dumps(img_dataset))
     f.close()
     cprint('Dataset is in ' + os.path.abspath(directory), 'blue')
-    set_state(directory)
+    utils.state.set(directory)
 
 #Get the images from ISIC archive
 def get_images(directory):

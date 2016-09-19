@@ -3,11 +3,10 @@
 """
 Generates a JSON file of data from the ISIC Archive.  
 """
-import isic_api as api
+import utils 
 
 
-path = api.input_path()
+path = utils.api.input_path()
 
-api.get_data(path)
-
-api.get_images(path)
+utils.api.get_id_list(path)
+utils.api.get_images(path)
