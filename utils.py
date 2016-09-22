@@ -25,6 +25,13 @@ class state:
                 shutil.rmtree(current_dataset['dir'])
                 os.remove('.state')
 
+    def get():
+        if state.exists():
+            current_dataset = json.load(open('.state'))
+            return current_dataset['dir']
+        else:
+            cprint("You need to run setup.py", "red")
+            
 class api:
 #ISIC-Archive API url
     isic_url = 'https://isic-archive.com:443/api/v1/image'
