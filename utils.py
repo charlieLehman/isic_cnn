@@ -1,8 +1,10 @@
+import cv2
 import json
 import sys
-import os.path
+import os.path as op
 import shutil
 import requests
+import numpy as np
 from multiprocessing import Process, Pool
 from tqdm import tqdm
 from termcolor import colored, cprint
@@ -21,13 +23,13 @@ class workingDirectory:
             while True:
                 try:
                     dataset_path = input(dir_query)
-                    os.path.isdir(dataset_path)
-                    dataset_path = os.path.join(dataset_path, 'isic_dataset')
+                    op.isdir(dataset_path)
+                    dataset_path = op.join(dataset_path, 'isic_dataset')
                     break
                 except FileNotFoundError:
                     colored("Please input a valid directory.\n","yellow")
 
-        if os.path.exists(dataset_path):
+        if op.exists(dataset_path):
             if ui.ynQuery("It looks like you already have the dataset. "
                                 "Should I overwrite? "):
                 return dataset_path
@@ -44,10 +46,10 @@ class workingDirectory:
         f.close()
 
     def exists():
-        return os.path.isfile('.workingDirectory')
+        return op.isfile('.workingDirectory')
 
-    def clean_up():
-        if os.path.isfile('.workingDirectory'):
+    def delete():
+        if op.isfile('.workingDirectory'):
             current_dataset = json.load(open('.workingDirectory'))
             if ui.ynQuery("Should I delete " + current_dataset['dir']):
                 shutil.rmtree(current_dataset['dir'])
@@ -109,12 +111,12 @@ class isic_api:
                 dataset.append(dict(img_meta))
 
 #Save the dataset to a directory
-        if not os.path.exists(directory):
+        if not op.exists(directory):
             os.makedirs(directory)
-        f = open(os.path.join(directory, 'dataset.json'), 'w')
+        f = open(op.join(directory, 'dataset.json'), 'w')
         f.write(json.dumps(dataset))
         f.close()
-        cprint('Dataset is in ' + os.path.abspath(directory), 'blue')
+        cprint('Dataset is in ' + op.abspath(directory), 'blue')
         workingDirectory.save(directory)
 
 
@@ -127,7 +129,7 @@ class isic_api:
             except ValueError: 
                 cprint('Please input an integer', 'red')
         try:
-            with open(os.path.join(directory,'dataset.json')) as dataset:
+            with open(op.join(directory,'dataset.json')) as dataset:
                 data = json.load(dataset)
 
             isic_api.__save_images__(directory, image_size, 'benign', [x for x in data if x['b_m'] == 'benign'])
@@ -142,12 +144,12 @@ class isic_api:
     def __save_images__(directory, image_size, name, id_set):
         isic_payload = {'width':image_size}
         print('Getting '+ name +' images \n')
-        imdir = os.path.join(directory,'images',name)
-        if not os.path.exists(imdir):
+        imdir = op.join(directory,'images',name)
+        if not op.exists(imdir):
             os.makedirs(imdir)
         for n in tqdm(range(0,len(id_set))):
             img_name = id_set[n]['filename']
-            with open(os.path.join(imdir,img_name)+'.jpg','wb') as f:
+            with open(op.join(imdir,img_name)+'.jpg','wb') as f:
                 isic_request = requests.get(isic_api.isic_url+'/'+id_set[n]['id']+'/thumbnail', params=isic_payload)
                 f.write(isic_request.content)
 
@@ -174,13 +176,77 @@ class ui:
                 cprint("Please respond with 'yes' or 'no' "
                        "(or 'y' or 'n').\n", "red")
 class dataset:                
+    def load_json():
+        return json.load(open(op.join(workingDirectory.get(),'dataset.json')))
+
 #Return count of entry
     def how_many(value, field):
         try:
-            with open(os.path.join(workingDirectory.get(),'dataset.json')) as dataset:
+            with open(op.join(workingDirectory.get(),'dataset.json')) as dataset:
                 return len([x for x in json.load(dataset) if x[field] == value])
 
         except FileNotFoundError as e:
             cprint('There is nothing here..\n', 'red')
             print(e)
             sys.exit(1)
+
+class imageSet:
+    def process_all(function, tag):
+        """Operate on all downloaded images and save with appended tag
+        """
+        data = dataset.load_json()
+        for n in tqdm(range(0,len(data))):
+            for x in ['benign', 'malignant']:
+                if data[n]['b_m']==x:
+                    filename = op.join(workingDirectory.get(),'images',x, data[n]['filename'])
+                    if op.isfile(filename + '.jpg'):
+                        try:
+                            im = cv2.imread(filename + '.jpg', cv2.IMREAD_ANYCOLOR)
+                            cv2.imwrite(filename + tag +'.png', function(im))
+                        except cv2.error as e:
+                            print(dataset[n]['id'])
+                    else:
+                        print(dataset[n]['id'])
+
+    def resize_to_32(image):
+        """Convert any size image to a 32x32 image 
+        """
+        try:
+            return cv2.resize(image,(32,32), interpolation = cv2.INTER_CUBIC)
+        except cv2.error as e:
+            print(e)
+
+    def to_HSV(image):
+        """Convert image to a HSV 
+        """
+        try:
+            return cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+        except cv2.error as e:
+            print(e)
+
+    def to_DCT(image):
+        """Convert to DCT of RGB channels
+        """
+        dctim = np.zeros(np.shape(image))
+        try:
+            dctim[:,:,0] = np.uint8(cv2.dct(np.float32(image[:,:,0])/255.0))*255.0    
+            dctim[:,:,1] = np.uint8(cv2.dct(np.float32(image[:,:,1])/255.0))*255.0    
+            dctim[:,:,2] = np.uint8(cv2.dct(np.float32(image[:,:,2])/255.0))*255.0    
+            return dctim
+
+        except cv2.error as e:
+            print(e)
+
+    def to_DCT_of_HSV(image):
+        """Convert to DCT of RGB channels
+        """
+        image = imageSet.to_HSV(image)
+        dctim = np.zeros(np.shape(image))
+        try:
+            dctim[:,:,0] = np.uint8(cv2.dct(np.float32(image[:,:,0])/255.0))*255.0    
+            dctim[:,:,1] = np.uint8(cv2.dct(np.float32(image[:,:,1])/255.0))*255.0    
+            dctim[:,:,2] = np.uint8(cv2.dct(np.float32(image[:,:,2])/255.0))*255.0    
+            return dctim
+
+        except cv2.error as e:
+            print(e)
