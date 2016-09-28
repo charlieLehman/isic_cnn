@@ -176,6 +176,7 @@ class ui:
             else:
                 cprint("Please respond with 'yes' or 'no' "
                        "(or 'y' or 'n').\n", "red")
+
 class dataset:                
     def load_json():
         return json.load(open(op.join(workingDirectory.get(),'dataset.json')))
@@ -222,6 +223,35 @@ class imageSet:
         """
         try:
             return cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+        except cv2.error as e:
+            print(e)
+
+    def to_FFT(image):
+        """Convert to DCT of RGB channels
+        """
+        fftim = np.zeros(np.shape(image))
+        try:
+            for n in [0,1,2]:
+                freqim = np.fft.fft2(image[:,:,n])
+                shiftim = np.fft.fftshift(freqim)
+                fftim[:,:,n] = 20*np.log(np.abs(shiftim))
+            return fftim
+
+        except cv2.error as e:
+            print(e)
+
+    def to_FFT_of_HSV(image):
+        """Convert to DCT of RGB channels
+        """
+        image = imageSet.to_HSV(image)
+        fftim = np.zeros(np.shape(image))
+        try:
+            for n in [0,1,2]:
+                freqim = np.fft.fft2(image[:,:,n])
+                shiftim = np.fft.fftshift(freqim)
+                fftim[:,:,n] = 20*np.log(np.abs(shiftim))
+            return fftim
+
         except cv2.error as e:
             print(e)
 
