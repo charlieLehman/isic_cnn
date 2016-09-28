@@ -53,7 +53,7 @@ class workingDirectory:
             current_dataset = json.load(open('.workingDirectory'))
             if ui.ynQuery("Should I delete " + current_dataset['dir']):
                 shutil.rmtree(current_dataset['dir'])
-                os.remove('.workingDirectory')
+                op.remove('.workingDirectory')
 
     def get():
         if workingDirectory.exists():
@@ -112,7 +112,7 @@ class isic_api:
 
 #Save the dataset to a directory
         if not op.exists(directory):
-            os.makedirs(directory)
+            op.makedirs(directory)
         f = open(op.join(directory, 'dataset.json'), 'w')
         f.write(json.dumps(dataset))
         f.close()
@@ -146,7 +146,7 @@ class isic_api:
         print('Getting '+ name +' images \n')
         imdir = op.join(directory,'images',name)
         if not op.exists(imdir):
-            os.makedirs(imdir)
+            op.makedirs(imdir)
         for n in tqdm(range(0,len(id_set))):
             img_name = id_set[n]['filename']
             with open(op.join(imdir,img_name)+'.jpg','wb') as f:
