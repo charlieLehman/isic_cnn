@@ -2,6 +2,7 @@ import cv2
 import json
 import sys
 import os.path as op
+import os
 import shutil
 import requests
 import numpy as np
@@ -112,7 +113,7 @@ class isic_api:
 
 #Save the dataset to a directory
         if not op.exists(directory):
-            op.makedirs(directory)
+            os.makedirs(directory)
         f = open(op.join(directory, 'dataset.json'), 'w')
         f.write(json.dumps(dataset))
         f.close()
@@ -146,7 +147,7 @@ class isic_api:
         print('Getting '+ name +' images \n')
         imdir = op.join(directory,'images',name)
         if not op.exists(imdir):
-            op.makedirs(imdir)
+            os.makedirs(imdir)
         for n in tqdm(range(0,len(id_set))):
             img_name = id_set[n]['filename']
             with open(op.join(imdir,img_name)+'.jpg','wb') as f:
