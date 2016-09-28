@@ -6,7 +6,7 @@ Generates a JSON file of data from the ISIC Archive.
 import utils 
 
 
-path = utils.api.input_path()
+path = utils.workingDirectory.init()
 
-utils.api.get_id_list(path)
-utils.api.get_images(path)
+utils.isic_api.get_id_list(path)
+utils.isic_api.get_images(path)
