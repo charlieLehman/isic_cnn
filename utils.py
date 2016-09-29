@@ -6,6 +6,7 @@ import os
 import shutil
 import requests
 import numpy as np
+import collections as c
 from multiprocessing import Process, Pool
 from tqdm import tqdm
 from termcolor import colored, cprint
@@ -54,7 +55,7 @@ class workingDirectory:
             current_dataset = json.load(open('.workingDirectory'))
             if ui.ynQuery("Should I delete " + current_dataset['dir']):
                 shutil.rmtree(current_dataset['dir'])
-                op.remove('.workingDirectory')
+                os.remove('.workingDirectory')
 
     def get():
         if workingDirectory.exists():
@@ -62,7 +63,6 @@ class workingDirectory:
             return current_dataset['dir']
         else:
             cprint("You need to run setup.py", "red")
-            
 class isic_api:
 #ISIC-Archive API url
     isic_url = 'https://isic-archive.com:443/api/v1/image'
@@ -92,8 +92,6 @@ class isic_api:
         img_meta = {}
         dataset = []
         count_images = len(img_id_list)
-        img_meta['count_benign']=0
-        img_meta['count_malign']=0
 
         cprint('Accessing isic-archive\'s API to retreive dataset ID list. This will take a while...', 'blue')
 
@@ -104,6 +102,7 @@ class isic_api:
             img_meta_list = img_meta_request.json()
             img_meta['id'] = img_id_list[n]['_id']
             img_meta['filename'] = img_meta_list['name']
+            img_meta['fileLoc'] = op.join(directory, 'images', img_meta_list['meta']['clinical'].get('benign_malignant'))
             img_meta['age'] = img_meta_list['meta']['clinical'].get('age')
             img_meta['sex'] = img_meta_list['meta']['clinical'].get('sex')
             img_meta['b_m'] = img_meta_list['meta']['clinical'].get('benign_malignant')
@@ -120,7 +119,6 @@ class isic_api:
         cprint('Dataset is in ' + op.abspath(directory), 'blue')
         workingDirectory.save(directory)
 
-
 #Get the images from ISIC archive
     def get_images(directory):
         while True:
@@ -132,10 +130,8 @@ class isic_api:
         try:
             with open(op.join(directory,'dataset.json')) as dataset:
                 data = json.load(dataset)
-
             isic_api.__save_images__(directory, image_size, 'benign', [x for x in data if x['b_m'] == 'benign'])
             isic_api.__save_images__(directory, image_size, 'malignant', [x for x in data if x['b_m'] == 'malignant'])
-
         except FileNotFoundError as e:
             cprint('There is nothing here..\n', 'red')
             print(e)
@@ -151,8 +147,12 @@ class isic_api:
         for n in tqdm(range(0,len(id_set))):
             img_name = id_set[n]['filename']
             with open(op.join(imdir,img_name)+'.jpg','wb') as f:
-                isic_request = requests.get(isic_api.isic_url+'/'+id_set[n]['id']+'/thumbnail', params=isic_payload)
-                f.write(isic_request.content)
+                if image_size > 512:
+                    isic_request = requests.get(isic_api.isic_url+'/'+id_set[n]['id']+'/download')
+                    f.write(isic_request.content)
+                else:
+                    isic_request = requests.get(isic_api.isic_url+'/'+id_set[n]['id']+'/thumbnail', params=isic_payload)
+                    f.write(isic_request.content)
 
 class ui:
     def ynQuery(question, default="no"):
@@ -165,7 +165,6 @@ class ui:
             prompt = " [y/N] "
         else:
             raise ValueError("invalid default answer: '%s'" % default)
-
         while True:
             cprint(question + prompt, 'yellow')
             choice = input().lower()
@@ -177,38 +176,31 @@ class ui:
                 cprint("Please respond with 'yes' or 'no' "
                        "(or 'y' or 'n').\n", "red")
 
-class dataset:                
+class isic_dataset:                
     def load_json():
         return json.load(open(op.join(workingDirectory.get(),'dataset.json')))
 
-#Return count of entry
-    def how_many(value, field):
-        try:
-            with open(op.join(workingDirectory.get(),'dataset.json')) as dataset:
-                return len([x for x in json.load(dataset) if x[field] == value])
-
-        except FileNotFoundError as e:
-            cprint('There is nothing here..\n', 'red')
-            print(e)
-            sys.exit(1)
+    def key_list():
+        data =  isic_dataset.load_json() 
+        return set( keys for dic in data for keys in dic.keys())
 
 class imageSet:
     def process_all(function, tag):
         """Operate on all downloaded images and save with appended tag
         """
-        data = dataset.load_json()
+        data = isic_dataset.load_json()
         for n in tqdm(range(0,len(data))):
-            for x in ['benign', 'malignant']:
-                if data[n]['b_m']==x:
-                    filename = op.join(workingDirectory.get(),'images',x, data[n]['filename'])
-                    if op.isfile(filename + '.jpg'):
-                        try:
-                            im = cv2.imread(filename + '.jpg', cv2.IMREAD_ANYCOLOR)
-                            cv2.imwrite(filename + tag +'.png', function(im))
-                        except cv2.error as e:
-                            print(dataset[n]['id'])
-                    else:
-                        print(dataset[n]['id'])
+            img_path = op.join(data[n]['fileLoc'],data[n]['filename'])
+            if op.isfile(img_path+'.jpg'):
+                try:
+                    im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
+                    proc_image = function(im)
+                    cv2.imwrite(img_path + tag +'.png',proc_image )
+                    cv2.imwrite(img_path + tag +'_32.png', imageSet.resize_to_32(proc_image))
+                except cv2.error as e:
+                    print(data[n]['id'])
+            else:
+                print(data[n]['id'])
 
     def resize_to_32(image):
         """Convert any size image to a 32x32 image 
@@ -281,3 +273,27 @@ class imageSet:
 
         except cv2.error as e:
             print(e)
+
+class probability:
+    def distribution(key):
+        data=isic_dataset.load_json() 
+        sample_size = len(data)
+        vals=[]
+        dist=[]
+        for n in range(0,sample_size):
+            vals.append(data[n][key])
+        dist = dict(c.Counter(vals))
+        dist.update((k,v/sample_size) for k,v in dist.items())
+        return dist
+"""
+class cifar_pickle:
+    def make():
+        data = workingDirectory.load_json()
+        for x in 
+        im = np.array(cv2.imread(path_to_image))
+        r = im[:,:,0].flatten()
+        g = im[:,:,1].flatten()
+        b = im[:,:,2].flatten()
+        label = [b_m_dict[dataset.get('b_m')]]
+        return np.array(list(label) + list(r) + list(g) + list(b),np.uint8)
+"""    
