@@ -11,10 +11,8 @@
 %  image_DCT_8 = block_dct ("/images/lena.jpg", 8);
 %  imshow (image_DCT_8);
 
-function [output_image] = block_dct(input_image, block_size)
-  I = double(imread(input_image));
-  T = dctmtx(block_size);
-  dct = @(block_struct) T * block_struct.data * T';
-  output_image = blockproc(I,[block_size block_size],dct);
-  output_image = uint8(output_image)
+function output_image = block_dct(input_image, block_size)
+  for n = [1,2,3]
+    output_image(:,:,n) = uint8(255*blockproc(input_image(:,:,n)/255,[block_size block_size],'dct2'));
+  endfor
 end
