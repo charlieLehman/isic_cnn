@@ -9,6 +9,7 @@ import requests
 import numpy as np
 import collections as c
 from multiprocessing import Process, Pool
+from oct2py import octave
 from tqdm import tqdm
 from termcolor import colored, cprint
 
@@ -244,6 +245,18 @@ class imageSet:
                 shiftim = np.fft.fftshift(freqim)
                 fftim[:,:,n] = 20*np.log(np.abs(shiftim))
             return fftim
+
+        except cv2.error as e:
+            print(e)
+
+    def to_DCT_8block(image):
+        """Convert to DCT of RGB channels
+        """
+        octave.eval('pkg load all')
+        octave.addpath('m_code')
+        try:
+            dct8im = octave.block_dct(image,64)
+            return dct8im
 
         except cv2.error as e:
             print(e)
