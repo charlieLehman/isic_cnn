@@ -1,7 +1,6 @@
 #Modules
-- Need to pickle images <http://www.cs.toronto.edu/~kriz/cifar.html>
-  - started prep_images.py
-- Make state handler track how many images were downloaded for use in pickler
+- generate requirements.txt
+- create disjoint id list of 1000 items with 7% malignant
 
 #Organization
 - Setup a __init__.py file and reorganize all of the utility modules in subdirs
