@@ -299,15 +299,35 @@ class probability:
         dist = dict(c.Counter(vals))
         dist.update((k,v/sample_size) for k,v in dist.items())
         return dist
-"""
-class cifar_pickle:
-    def make():
-        data = workingDirectory.load_json()
-        for x in 
-        im = np.array(cv2.imread(path_to_image))
+
+class cifar:
+    def pickle(im, b_m):
+        """Label + serialized image
+        """
+        label = {'benign':0, 'malignant':1}
         r = im[:,:,0].flatten()
         g = im[:,:,1].flatten()
         b = im[:,:,2].flatten()
-        label = [b_m_dict[dataset.get('b_m')]]
-        return np.array(list(label) + list(r) + list(g) + list(b),np.uint8)
-"""    
+        return np.array([label[b_m]] + list(r) + list(g) + list(b),np.uint8)
+    
+    def unpickle(pickle):
+        """Assumes square image
+           Mostly used for testing
+        """
+        channel_length = int((len(pickle)-1)/3)
+        image_size =  int(np.sqrt(channel_length))
+        flat_image = np.delete(pickle,0)
+        im = np.zeros([image_size, image_size, 3])
+        im[:,:,0] = flat_image[:channel_length].reshape([image_size, image_size])
+        im[:,:,1] = flat_image[channel_length:channel_length*2].reshape([image_size, image_size])
+        im[:,:,2] = flat_image[channel_length*2:].reshape([image_size, image_size])
+        return np.array(im, np.uint8)
+
+#   def make_binary(list_of_ids):
+#       """Generates a CIFAR-like binary from a list of IDs
+#       """
+#       data = workingDirectory.load_json()
+#       for n in list_of_ids:
+
+
+
