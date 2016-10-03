@@ -198,7 +198,7 @@ class imageSet:
                     im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
                     proc_image = function(im)
                     cv2.imwrite(img_path + tag +'.png',proc_image )
-                    cv2.imwrite(img_path + tag +'_32.png', imageSet.resize_to_32(proc_image))
+                    #cv2.imwrite(img_path + tag +'_32.png', imageSet.resize_to_32(proc_image))
                 except cv2.error as e:
                     print(data[n]['id'])
             else:

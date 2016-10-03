@@ -13,6 +13,6 @@
 
 function output_image = block_dct(input_image, block_size)
   for n = [1,2,3]
-    output_image(:,:,n) = uint8(255*blockproc(input_image(:,:,n)/255,[block_size block_size],'dct2'));
+    output_image(:,:,n) = uint8(255*blockproc(double(input_image(:,:,n))/255,[block_size block_size],'dct2'));
   endfor
 end
