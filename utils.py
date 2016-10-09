@@ -109,7 +109,7 @@ class isic_api:
             img_meta['sex'] = img_meta_list['meta']['clinical'].get('sex')
             img_meta['b_m'] = img_meta_list['meta']['clinical'].get('benign_malignant')
             img_meta['diagnosis'] = img_meta_list['meta']['clinical'].get('diagnosis')
-            if img_meta not in dataset:
+            if img_meta not in dataset and img_meta['b_m'] != 'unknown':
                 dataset.append(dict(img_meta))
 
 #Save the dataset to a directory
@@ -191,6 +191,7 @@ class imageSet:
         """Operate on all downloaded images and save with appended tag
         """
         data = isic_dataset.load_json()
+        data = [x for x in data if x['b_m'] != 'unknown']
         for n in tqdm(range(0,len(data))):
             img_path = op.join(data[n]['fileLoc'],data[n]['filename'])
             if op.isfile(img_path+'_32.png'):
@@ -260,10 +261,13 @@ class imageSet:
         """Convert to DCT of RGB channels
         """
         oct_inst = Oct2Py()
-        oct_inst.eval('pkg load all')
-        oct_inst.addpath('m_code')
-        dct8im = oct_inst.block_dct(image,16)
-        return dct8im
+        try:
+            oct_inst.eval('pkg load all')
+            oct_inst.addpath('m_code')
+            dct8im = oct_inst.block_dct(image,16)
+            return dct8im
+        except Exception as e:
+            return str(e)
 
     def to_DCT(image):
         """Convert to DCT of RGB channels
@@ -330,5 +334,16 @@ class cifar:
 #       data = workingDirectory.load_json()
 #       for n in list_of_ids:
 
+class test:
+    def data_vs_img():
+        mismatch = []
+        data = isic_dataset.load_json()
+        for n in tqdm(range(0,len(data))):
+            img_path = op.join(data[n]['fileLoc'],data[n]['filename'])
+            if op.isfile(img_path+'_32.png') != True:
+                mismatch.append(img_path)
+        f = open('data_vs_img', 'w')
+        json.dump(mismatch,f)
+        f.close()
 
 

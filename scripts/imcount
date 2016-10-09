@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo '32 px images'
+ls /tmp/isic_dataset/images/benign    | grep _32 | wc -l
+ls /tmp/isic_dataset/images/malignant | grep _32 | wc -l
+
+echo 'HSV images'
+ls /tmp/isic_dataset/images/benign    | grep HSV | wc -l
+ls /tmp/isic_dataset/images/malignant | grep HSV | wc -l
+
+echo 'FFT images'
+ls /tmp/isic_dataset/images/benign    | grep FFT | wc -l
+ls /tmp/isic_dataset/images/malignant | grep FFT | wc -l
+
+echo 'DCT images'
+ls /tmp/isic_dataset/images/benign    | grep DCT | wc -l
+ls /tmp/isic_dataset/images/malignant | grep DCT | wc -l
