@@ -4,3 +4,4 @@ matlab
 workingDirectory
 .workingDirectory
 octave-workspace
+*.swp

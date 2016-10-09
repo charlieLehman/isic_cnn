@@ -193,16 +193,23 @@ class imageSet:
         data = isic_dataset.load_json()
         for n in tqdm(range(0,len(data))):
             img_path = op.join(data[n]['fileLoc'],data[n]['filename'])
-            if op.isfile(img_path+'.jpg'):
+            if op.isfile(img_path+'_32.png'):
                 try:
-                    im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
+                    im = cv2.imread(img_path+'_32.png', cv2.IMREAD_ANYCOLOR)
                     proc_image = function(im)
                     cv2.imwrite(img_path + tag +'.png',proc_image )
                     #cv2.imwrite(img_path + tag +'_32.png', imageSet.resize_to_32(proc_image))
                 except cv2.error as e:
                     print(data[n]['id'])
             else:
-                print(data[n]['id'])
+                try:
+                    im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
+                    cv2.imwrite(img_path +'_32.png', imageSet.resize_to_32(im))
+                    im_32 = cv2.imread(img_path+'_32.png', cv2.IMREAD_ANYCOLOR)
+                    proc_image = function(im_32)
+                    cv2.imwrite(img_path + tag +'.png',proc_image )
+                except cv2.error as e:
+                    print(data[n]['id'])
 
     def resize_to_32(image):
         """Convert any size image to a 32x32 image 
@@ -249,13 +256,13 @@ class imageSet:
         except cv2.error as e:
             print(e)
 
-    def to_DCT_8block(image):
+    def to_DCT_block(image):
         """Convert to DCT of RGB channels
         """
         octave.eval('pkg load all')
         octave.addpath('m_code')
         try:
-            dct8im = octave.block_dct(image,64)
+            dct8im = octave.block_dct(image,16)
             return dct8im
 
         except cv2.error as e:
@@ -278,11 +285,8 @@ class imageSet:
         """Convert to DCT of RGB channels
         """
         image = imageSet.to_HSV(image)
-        dctim = np.zeros(np.shape(image))
         try:
-            dctim[:,:,0] = np.uint8(cv2.dct(np.float32(image[:,:,0])/255.0))*255.0    
-            dctim[:,:,1] = np.uint8(cv2.dct(np.float32(image[:,:,1])/255.0))*255.0    
-            dctim[:,:,2] = np.uint8(cv2.dct(np.float32(image[:,:,2])/255.0))*255.0    
+            dctim = imageSet.to_DCT_block(image)
             return dctim
 
         except cv2.error as e:
