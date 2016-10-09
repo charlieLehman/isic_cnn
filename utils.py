@@ -9,7 +9,7 @@ import requests
 import numpy as np
 import collections as c
 from multiprocessing import Process, Pool
-from oct2py import octave
+from oct2py import Oct2Py
 from tqdm import tqdm
 from termcolor import colored, cprint
 
@@ -259,14 +259,11 @@ class imageSet:
     def to_DCT_block(image):
         """Convert to DCT of RGB channels
         """
-        octave.eval('pkg load all')
-        octave.addpath('m_code')
-        try:
-            dct8im = octave.block_dct(image,16)
-            return dct8im
-
-        except cv2.error as e:
-            print(e)
+        oct_inst = Oct2Py()
+        oct_inst.eval('pkg load all')
+        oct_inst.addpath('m_code')
+        dct8im = oct_inst.block_dct(image,16)
+        return dct8im
 
     def to_DCT(image):
         """Convert to DCT of RGB channels
