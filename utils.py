@@ -1,4 +1,3 @@
-#Added a comment
 import cv2
 import json
 import sys
@@ -349,16 +348,13 @@ class cifar:
         number_of_images_in_bins = 1000
         benign_dict = [x for x in data if x['b_m'] == 'benign']
         malign_dict = [x for x in data if x['b_m'] == 'malignant']
-        bin_dict = []
 
-        for n in range(1,len(data)):
-            bin_dict.append();
-
-        return bin_dict
-            
-
-        
-
+        ben_id = isic_dataset.dict_to_list(benign_dict, 'id')
+        mal_id = isic_dataset.dict_to_list(malign_dict, 'id')
+        id_RV = isic_dataset.shuffle(ben_id,mal_id,930,70)
+        with open(op.join(workingDirectory.get(),'id_RV.json'),'w') as f:
+            json.dump(id_RV,f)
+            f.close()
 
     def pickle(im, b_m):
         """Label + serialized image
@@ -382,12 +378,26 @@ class cifar:
         im[:,:,2] = flat_image[channel_length*2:].reshape([image_size, image_size])
         return np.array(im, np.uint8)
 
-#   def make_binary(list_of_ids):
-#       """Generates a CIFAR-like binary from a list of IDs
-#       """
-#       data = workingDirectory.load_json()
-#       for n in list_of_ids:
+    def make_binary(tag):
+        """Generates a CIFAR-like binary from a list of IDs
+        """
+        cifar.bin_list_gen()
+        with open(op.join(workingDirectory.get(),'id_RV.json'),'r') as f:
+            id_RV = json.load(f)
+            f.close()
 
+        data = isic_dataset.load_json()
+        for index, n in enumerate(tqdm(id_RV)):
+            binary = []
+            for m in tqdm(n):
+                x = [x for x in data if x['id'] == m]
+                img_path = op.join(x[0]['fileLoc'],x[0]['filename'])
+                im = cv2.imread(img_path+tag+'.png', cv2.IMREAD_ANYCOLOR)
+                binary = np.append(binary,cifar.pickle(im,x[0]['b_m']))
+            with open(op.join(workingDirectory.get(),'bin'+tag+'_'+str(index)+'.bin'),'wb') as f:
+                f.write(binary)
+                f.close()
+                
 class test:
     def data_vs_img():
         mismatch = []
