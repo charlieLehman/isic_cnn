@@ -25,6 +25,6 @@ def process_image(img_path):
 if __name__ == '__main__':
     pool = Pool()
     l = path_list()
-    rs = pool.imap(process_image, reversed(l))
-    for n in tqdm(reversed(l)):
+    rs = pool.imap(process_image, l)
+    for n in tqdm(l):
         rs.next()

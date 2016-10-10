@@ -180,18 +180,35 @@ class ui:
 
 class isic_dataset:                
     def load_json():
-        return json.load(open(op.join(workingDirectory.get(),'dataset.json')))
+        data =  json.load(open(op.join(workingDirectory.get(),'dataset.json')))
+        data = [x for x in data if x['b_m'] != 'unknown']
+        return data
 
     def key_list():
         data =  isic_dataset.load_json() 
         return set( keys for dic in data for keys in dic.keys())
+
+    def dict_to_list(dict_for_work,key):
+        result_list = []
+        for n in range(0,len(dict_for_work)):
+            result_list.append(dict_for_work[n][key])
+        return result_list
+
+    def shuffle(list1, list2, row_len1, row_len2):
+        result_list = []
+        max_num_bins = int(min(np.floor(len(list1)/row_len1),np.floor(len(list2)/row_len2)))
+        for n in range(1,max_num_bins):
+            seg1 = list1[0+row_len1*(n-1):row_len1*n]
+            seg2 = list2[0+row_len2*(n-1):row_len2*n]
+            result_list.append(seg1+seg2)
+        return result_list
+
 
 class imageSet:
     def process_all(function, tag):
         """Operate on all downloaded images and save with appended tag
         """
         data = isic_dataset.load_json()
-        data = [x for x in data if x['b_m'] != 'unknown']
         for n in tqdm(range(0,len(data))):
             img_path = op.join(data[n]['fileLoc'],data[n]['filename'])
             if op.isfile(img_path+'_32.png'):
@@ -199,7 +216,6 @@ class imageSet:
                     im = cv2.imread(img_path+'_32.png', cv2.IMREAD_ANYCOLOR)
                     proc_image = function(im)
                     cv2.imwrite(img_path + tag +'.png',proc_image )
-                    #cv2.imwrite(img_path + tag +'_32.png', imageSet.resize_to_32(proc_image))
                 except cv2.error as e:
                     print(data[n]['id'])
             else:
@@ -272,11 +288,30 @@ class imageSet:
     def to_DCT(image):
         """Convert to DCT of RGB channels
         """
-        dctim = np.zeros(np.shape(image))
+        im_size = np.shape(image)
+        dctim = np.zeros(im_size)
+        quad = [(0, 15, 0, 15,1), (16, 31, 0, 15,2), (0, 15, 16, 31,3) ,(16, 31, 16, 31,4)]
+        def q1(im):
+            return np.flipud(np.fliplr(im))
+        def q2(im):
+            return np.fliplr(im)
+        def q3(im):
+            return np.flipud(im)
+        def q4(im):
+            return im
+
+            
+        flipper = {1:q1,
+                   2:q2,
+                   3:q3,
+                   4:q4}
         try:
-            dctim[:,:,0] = np.uint8(cv2.dct(np.float32(image[:,:,0])/255.0))*255.0    
-            dctim[:,:,1] = np.uint8(cv2.dct(np.float32(image[:,:,1])/255.0))*255.0    
-            dctim[:,:,2] = np.uint8(cv2.dct(np.float32(image[:,:,2])/255.0))*255.0    
+            for n in [0,1,2]:
+                for x_b, x_e, y_b, y_e, q in quad:
+                    dctim[x_b:x_e,y_b:y_e,n] = flipper[q](np.uint8(cv2.dct(np.float32(image[x_b:x_e,y_b:y_e,n])/255.0))*255.0)
+
+            
+
             return dctim
 
         except cv2.error as e:
@@ -287,12 +322,14 @@ class imageSet:
         """
         image = imageSet.to_HSV(image)
         try:
-            dctim = imageSet.to_DCT_block(image)
+            dctim = imageSet.to_DCT(image)
             return dctim
 
         except cv2.error as e:
             print(e)
 
+        
+        
 class probability:
     def distribution(key):
         data=isic_dataset.load_json() 
@@ -306,6 +343,23 @@ class probability:
         return dist
 
 class cifar:
+    def bin_list_gen():
+        data = isic_dataset.load_json()
+        number_of_bins = 10
+        number_of_images_in_bins = 1000
+        benign_dict = [x for x in data if x['b_m'] == 'benign']
+        malign_dict = [x for x in data if x['b_m'] == 'malignant']
+        bin_dict = []
+
+        for n in range(1,len(data)):
+            bin_dict.append();
+
+        return bin_dict
+            
+
+        
+
+
     def pickle(im, b_m):
         """Label + serialized image
         """
