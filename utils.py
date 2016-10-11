@@ -196,12 +196,11 @@ class isic_dataset:
     def shuffle(list1, list2, row_len1, row_len2):
         result_list = []
         max_num_bins = int(min(np.floor(len(list1)/row_len1),np.floor(len(list2)/row_len2)))
-        for n in range(1,max_num_bins):
+        for n in range(1,max_num_bins+1):
             seg1 = list1[0+row_len1*(n-1):row_len1*n]
             seg2 = list2[0+row_len2*(n-1):row_len2*n]
             result_list.append(seg1+seg2)
         return result_list
-
 
 class imageSet:
     def process_all(function, tag):
@@ -327,8 +326,6 @@ class imageSet:
         except cv2.error as e:
             print(e)
 
-        
-        
 class probability:
     def distribution(key):
         data=isic_dataset.load_json() 
@@ -344,8 +341,6 @@ class probability:
 class cifar:
     def bin_list_gen():
         data = isic_dataset.load_json()
-        number_of_bins = 10
-        number_of_images_in_bins = 1000
         benign_dict = [x for x in data if x['b_m'] == 'benign']
         malign_dict = [x for x in data if x['b_m'] == 'malignant']
 
@@ -360,9 +355,11 @@ class cifar:
         """Label + serialized image
         """
         label = {'benign':0, 'malignant':1}
+        im = np.array(im)
         r = im[:,:,0].flatten()
         g = im[:,:,1].flatten()
         b = im[:,:,2].flatten()
+
         return np.array([label[b_m]] + list(r) + list(g) + list(b),np.uint8)
     
     def unpickle(pickle):
@@ -393,11 +390,11 @@ class cifar:
                 x = [x for x in data if x['id'] == m]
                 img_path = op.join(x[0]['fileLoc'],x[0]['filename'])
                 im = cv2.imread(img_path+tag+'.png', cv2.IMREAD_ANYCOLOR)
-                binary = np.append(binary,cifar.pickle(im,x[0]['b_m']))
+                binary = np.array(list(binary)+list(cifar.pickle(im,x[0]['b_m'])))
             with open(op.join(workingDirectory.get(),'bin'+tag+'_'+str(index)+'.bin'),'wb') as f:
                 f.write(binary)
                 f.close()
-                
+        
 class test:
     def data_vs_img():
         mismatch = []

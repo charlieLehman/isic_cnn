@@ -1,0 +1,6 @@
+numpy==1.11.2
+oct2py==3.5.9
+requests==2.11.1
+termcolor==1.1.0
+tqdm==4.8.4
+cv2==1.0

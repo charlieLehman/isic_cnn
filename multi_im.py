@@ -14,10 +14,10 @@ def path_list():
     return img_path
 
 def process_image(img_path):
-    tag = '_DCT' 
+    tag = '_32' 
     try:
-        im = cv2.imread(img_path+'_32.png', cv2.IMREAD_ANYCOLOR)
-        proc_image = u.imageSet.to_DCT(im)
+        im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
+        proc_image = u.imageSet.resize_to_32(im)
         cv2.imwrite(img_path + tag +'.png',proc_image )
     except cv2.error as e:
         print(img_path)
