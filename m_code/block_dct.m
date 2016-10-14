@@ -3,7 +3,7 @@
 % This takes the blocked Discrete Cosine Transform of the
 % input image. 
 
-% input_image expects a directory
+% input_image expects a numpy array
 % block_size expects an integer
 %
 % Example:
