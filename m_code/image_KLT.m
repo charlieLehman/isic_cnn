@@ -1,8 +1,8 @@
-% usage: [output_image] = image_KLT(input_image_dir, num_eig_vectors)
+% usage: [output_image] = image_KLT(input_image, num_eig_vectors)
 % 
 % This function takes the KLT and keeps only the first k eigen-vectors 
 
-% input_image_dir expects a directory
+% input_image expects a numpy array that is going to be processed
 % num_eig_vectors expects an integer
 % output_image is the same size as original
 % Example:
@@ -10,9 +10,9 @@
 %  image_KLT_150 = image_KLT('/Images/statue.png', 150);
 %  imshow(image_KLT_150);
 
-function [output_image] = image_KLT(input_image_dir,k) 
+function [output_image] = image_KLT(input_image,k) 
 
-I = double(imread(input_image_dir));
+I = double(input_image_dir);
 for n = 1:3 %have to do it for each RGB channel
     X = I(:,:,n);
     [M,N] = size(X); 
