@@ -7,12 +7,12 @@
 % output_image is the same size as original
 % Example:
 % 
-%  image_KLT_150 = image_KLT('/Images/statue.png', 150);
+%  image_KLT_150 = image_KLT(input_image, 150);
 %  imshow(image_KLT_150);
 
 function [output_image] = image_KLT(input_image,k) 
 
-I = double(input_image_dir);
+I = double(input_image);
 for n = 1:3 %have to do it for each RGB channel
     X = I(:,:,n);
     [M,N] = size(X); 
