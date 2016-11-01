@@ -203,7 +203,7 @@ class isic_dataset:
         return result_list
 
 class imageSet:
-    def process_all(function, tag):
+    def process_all_32(function, tag):
         """Operate on all downloaded images and save with appended tag
         """
         data = isic_dataset.load_json()
@@ -219,18 +219,34 @@ class imageSet:
             else:
                 try:
                     im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
-                    cv2.imwrite(img_path +'_32.png', imageSet.resize_to_32(im))
+                    cv2.imwrite(img_path +'_32.png', imageSet.resize_to(im,32))
                     im_32 = cv2.imread(img_path+'_32.png', cv2.IMREAD_ANYCOLOR)
                     proc_image = function(im_32)
                     cv2.imwrite(img_path + tag +'.png',proc_image )
                 except cv2.error as e:
                     print(data[n]['id'])
 
-    def resize_to_32(image):
+    def process_all(function, tag, *arg):
+        """Operate on all downloaded images and save with appended tag
+        """
+        data = isic_dataset.load_json()
+        for n in tqdm(range(0,len(data))):
+            img_path = op.join(data[n]['fileLoc'],data[n]['filename'])
+            if op.isfile(img_path+'.jpg'):
+                try:
+                    im = cv2.imread(img_path+'.jpg', cv2.IMREAD_ANYCOLOR)
+                    proc_image = function(im, *arg)
+                    cv2.imwrite(img_path + tag +'.png',proc_image )
+                except cv2.error as e:
+                    print(data[n]['id'])
+            else:
+                print(data[n]['id'])
+
+    def resize_to(image, size):
         """Convert any size image to a 32x32 image 
         """
         try:
-            return cv2.resize(image,(32,32), interpolation = cv2.INTER_CUBIC)
+            return cv2.resize(image,(size,size), interpolation = cv2.INTER_CUBIC)
         except cv2.error as e:
             print(e)
 
@@ -243,7 +259,7 @@ class imageSet:
             print(e)
 
     def to_FFT(image):
-        """Convert to DCT of RGB channels
+        """Convert to FFT of RGB channels
         """
         fftim = np.zeros(np.shape(image))
         try:
@@ -257,7 +273,7 @@ class imageSet:
             print(e)
 
     def to_FFT_of_HSV(image):
-        """Convert to DCT of RGB channels
+        """Convert to HSV of RGB channels
         """
         image = imageSet.to_HSV(image)
         fftim = np.zeros(np.shape(image))
@@ -286,9 +302,32 @@ class imageSet:
     def to_DCT(image):
         """Convert to DCT of RGB channels
         """
-        im_size = np.shape(image)
-        dctim = np.zeros(im_size)
-        quad = [(0, 15, 0, 15,1), (16, 31, 0, 15,2), (0, 15, 16, 31,3) ,(16, 31, 16, 31,4)]
+        h, w, d = np.shape(image)
+        dctim = np.zeros([h,w,d])
+        block = 8
+        x = int(h/block)
+        y = int(w/block)
+
+        try:
+            for n in [0,1,2]:
+                for k in range(1,x):
+                    for l in range(1,y):
+                        dctim[block*k-block:block*k,block*l-block:block*l,n] = np.uint8(cv2.dct(np.float32(image[block*k-block:block*k,block*l-block:block*l,n])/255.0))*255.0
+
+            return dctim
+
+        except cv2.error as e:
+            print(e)
+
+    def to_DCT_flip(image):
+        """Convert to DCT of RGB channels
+        """
+        h, w, d = np.shape(image)
+        dctim = np.zeros([h,w,d])
+        x = int(h/4)
+        y = int(w/4)
+
+        quad = [(0, 127, 0, 127,1), (128, 255, 0, 127,2), (0, 127, 128, 255,3) ,(128, 255, 128, 255,4)]
         def q1(im):
             return np.flipud(np.fliplr(im))
         def q2(im):
@@ -307,8 +346,6 @@ class imageSet:
             for n in [0,1,2]:
                 for x_b, x_e, y_b, y_e, q in quad:
                     dctim[x_b:x_e,y_b:y_e,n] = flipper[q](np.uint8(cv2.dct(np.float32(image[x_b:x_e,y_b:y_e,n])/255.0))*255.0)
-
-            
 
             return dctim
 
@@ -346,7 +383,7 @@ class cifar:
 
         ben_id = isic_dataset.dict_to_list(benign_dict, 'id')
         mal_id = isic_dataset.dict_to_list(malign_dict, 'id')
-        id_RV = isic_dataset.shuffle(ben_id,mal_id,930,70)
+        id_RV = isic_dataset.shuffle(ben_id,mal_id,465,35)
         with open(op.join(workingDirectory.get(),'id_RV.json'),'w') as f:
             json.dump(id_RV,f)
             f.close()

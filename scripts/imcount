@@ -1,29 +1,33 @@
 #!/bin/bash
 
 echo 'Total images'
-ls /tmp/isic_dataset/images/benign    | wc -l
-ls /tmp/isic_dataset/images/malignant | wc -l
+ls ~/martin/isic_dataset/images/benign    | wc -l
+ls ~/martin/isic_dataset/images/malignant | wc -l
+
+echo 'Unprocessed Images'
+ls ~/martin/isic_dataset/images/benign    | grep -P '\d{7}.jpg' | wc -l
+ls ~/martin/isic_dataset/images/malignant | grep -P '\d{7}.jpg' | wc -l
 
 echo '32 px images'
-ls /tmp/isic_dataset/images/benign    | grep '_32\.'| wc -l
-ls /tmp/isic_dataset/images/malignant | grep '_32\.'| wc -l
+ls ~/martin/isic_dataset/images/benign    | grep '_32\.'| wc -l
+ls ~/martin/isic_dataset/images/malignant | grep '_32\.'| wc -l
 
 echo 'HSV images'
-ls /tmp/isic_dataset/images/benign    | grep '[0-9]_HSV\.'| wc -l
-ls /tmp/isic_dataset/images/malignant | grep '[0-9]_HSV\.'| wc -l
+ls ~/martin/isic_dataset/images/benign    | grep '[0-9]_HSV\.'| wc -l
+ls ~/martin/isic_dataset/images/malignant | grep '[0-9]_HSV\.'| wc -l
 
 echo 'FFT of HSV images'
-ls /tmp/isic_dataset/images/benign    | grep 'FFT_of_HSV\.'| wc -l
-ls /tmp/isic_dataset/images/malignant | grep 'FFT_of_HSV\.'| wc -l
+ls ~/martin/isic_dataset/images/benign    | grep 'FFT_of_HSV\.'| wc -l
+ls ~/martin/isic_dataset/images/malignant | grep 'FFT_of_HSV\.'| wc -l
 
 echo 'FFT images'
-ls /tmp/isic_dataset/images/benign    | grep '_FFT\.'| wc -l
-ls /tmp/isic_dataset/images/malignant | grep '_FFT\.'| wc -l
+ls ~/martin/isic_dataset/images/benign    | grep '_FFT\.'| wc -l
+ls ~/martin/isic_dataset/images/malignant | grep '_FFT\.'| wc -l
 
 echo 'DCT images'
-ls /tmp/isic_dataset/images/benign    | grep '_DCT\.'| wc -l
-ls /tmp/isic_dataset/images/malignant | grep '_DCT\.'| wc -l
+ls ~/martin/isic_dataset/images/benign    | grep '_DCT\.'| wc -l
+ls ~/martin/isic_dataset/images/malignant | grep '_DCT\.'| wc -l
 
 echo 'DCT of HSV images'
-ls /tmp/isic_dataset/images/benign    | grep 'DCT_of_HSV\.'| wc -l
-ls /tmp/isic_dataset/images/malignant | grep 'DCT_of_HSV\.'| wc -l
+ls ~/martin/isic_dataset/images/benign    | grep 'DCT_of_HSV\.'| wc -l
+ls ~/martin/isic_dataset/images/malignant | grep 'DCT_of_HSV\.'| wc -l
