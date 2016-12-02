@@ -5,3 +5,7 @@
  - Install opencv
   - <http://www.pyimagesearch.com/2016/10/24/ubuntu-16-04-how-to-install-opencv/>
  - Install tensorflow
+ - run setup.py
+ - run transform_images.py (for each desired transformation with 256 being the first)
+ - run multi_im.py (is another version of transform_images.py with multiprocessing)
+ - run binary_make or binary_make_slow (generates the binary files for CIFAR model. This is done for each transformation)
