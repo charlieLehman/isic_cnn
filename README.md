@@ -1,7 +1,8 @@
 # Skin Lesion Classification: Transformation-based approach to CNNs
-![Multiple Bases of a skin lesion during training](.images/sample.png)
 
-![Flow Chart](.images/flow.png)
+<p align="center">
+<img src=".images/flow.png">
+</p>
 
 ## Installing / Getting started
 A minimal setup you need to get running.
