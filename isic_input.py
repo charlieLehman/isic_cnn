@@ -110,7 +110,7 @@ def image_batch(batch_size, train=True):
     with tf.device('/cpu:0'):
         if train:
             image, label = read_and_decode_single_example('%s.tfrecords' % TRAIN_NAME)
-            image = tf.random_crop(tf.image.resize_images(image, np.multiply(IMAGE_SHAPE[:-1],1.5)), IMAGE_SHAPE)
+            image = tf.random_crop(tf.image.resize_images(image, np.multiply(IMAGE_SHAPE[:-1],2)), IMAGE_SHAPE)
             min_queue_examples = int(NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN *
                                 min_fraction_of_examples_in_queue)
 
