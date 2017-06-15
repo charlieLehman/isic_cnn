@@ -1,4 +1,5 @@
-# Skin Lesion Classification: Transformation-based approach to CNNs
+# Skin Lesion Classification 
+# Transformation-based approach to CNNs
 
 <p align="center">
 <img src=".images/flow.png">
@@ -37,6 +38,12 @@ pip install -R requirements.txt
 
 ### Dataset
 We modified the [ISIC-archive](https://isic-archive.com/) by creating square crops registered on the legion in the images in order to remove large colored stickers and normalize the scale. Any images where the legion was smaller than 100px X 100px were not used. This resulted in ~6000 images.
+
+### Paper
+
+[Skin Lesion Classification: Transformation-based approach to CNNs](http://ghassanalregib.com/)
+
+## Experiment 
 
 ### Preparing input
 First, download the data and generate the TFRecords using isic_input.py.  This will build random 80/20 split for training/testing images, it does not care about distribution of labels. Be sure to indicate the where the images are located and what you want the TFRecords to be named.
@@ -90,10 +97,6 @@ def main(argv = None):
 ```shell
 python isic_cnn.py
 ```
-
-### Paper
-
-[Skin Lesion Classification: Transformation-based approach to CNNs](http://ghassanalregib.com/)
 
 
 
