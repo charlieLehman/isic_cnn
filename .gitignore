@@ -1,0 +1,7 @@
+img_training_klt.mat
+*.tfrecord*
+*octave*
+*mat*
+*isic*data*
+isic_cnn_sep.py
+__pycache__
