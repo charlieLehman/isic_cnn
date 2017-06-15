@@ -1,4 +1,5 @@
-# Skin Lesion Classification: Transformation-based approach to CNNs
+# Skin Lesion Classification: 
+## Transformation-based approach to CNNs
 
 <p align="center">
 <img src=".images/flow.png">
